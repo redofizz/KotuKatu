@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   test_backend:
     docker:
-      - image: circleci/ruby:3.0.2-stretch-node
+      - image: circleci/ruby:3.0.2-node
         environment:
           BUNDLE_RETRY: 3
           BUNDLE_PATH: vendor/bundle
