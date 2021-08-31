@@ -10,7 +10,7 @@ jobs:
           BUNDLER_VERSION: 2.2.26
           RAILS_ENV: test
           DB_HOST: 127.0.0.1
-      - image: circleci/mysql:5.7.30
+      - image: circleci/mysql:8.0.23
 
     working_directory: ~/repo
 
