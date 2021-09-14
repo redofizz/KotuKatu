@@ -1,4 +1,4 @@
-version: "3"
+version: '3.8'
 
 services:
   db:
@@ -44,10 +44,13 @@ services:
     build: ./frontend/
     image: frontend
     volumes:
+      - node_modules_volume:/frontend/app/node_modules
       - ./frontend:/app
     ports:
       - 3000:3000
     command: "npm run dev"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     networks:
       app_net:
         ipv4_address: '172.20.0.4'
@@ -63,3 +66,4 @@ networks:
 volumes:
   mysql_data:
   bundle_data:
+  node_modules_volume:
