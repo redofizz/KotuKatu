@@ -59,4 +59,6 @@ DeviseTokenAuth.setup do |config|
   config.send_confirmation_email = true
 
   config.require_client_password_reset_token = true
+
+  config.remove_tokens_after_password_reset = true
 end

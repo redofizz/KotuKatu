@@ -30,8 +30,7 @@ export const resetPassword = (params: ResetPasswordParams) => {
 }
 
 // パスワード変更
-export const changePassword = (params: ChangePasswordParams, ctx?: NextPageContext) => {
-  const Cookies = parseCookies(ctx);
+export const changePassword = (params: ChangePasswordParams) => {
   return apiclient.put("auth/password", params)
 }
 
@@ -39,7 +38,7 @@ export const changePassword = (params: ChangePasswordParams, ctx?: NextPageConte
 export const getCurrentUser = (ctx?: NextPageContext) => {
   const Cookies = parseCookies(ctx);
   if (!Cookies._access_token || !Cookies._client || !Cookies._uid) return
-  return apiclient.get("/auth/sessions", { headers: {
+  return apiclient.get("auth/validate_token", { headers: {
     "access-token": Cookies._access_token,
     "client": Cookies._client,
     "uid": Cookies._uid

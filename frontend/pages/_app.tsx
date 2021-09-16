@@ -58,7 +58,20 @@ const MyApp = ({ Component, pageProps }: AppProps, ctx: NextPageContext) => {
 
     try {
       const res = await getCurrentUser()
-      if (res?.data.is_login === true) {
+      if (res?.data.success === true) {
+        setCookie(null, '_access_token', res.headers["access-token"], {
+          maxAge: 30 * 24 * 60 * 60, // お好きな期限を
+          path: '/',
+        });
+        setCookie(null, '_client', res.headers["client"], {
+          maxAge: 30 * 24 * 60 * 60, // お好きな期限を
+          path: '/',
+        });
+    
+        setCookie(null, '_uid', res.headers["uid"], {
+          maxAge: 30 * 24 * 60 * 60, // お好きな期限を
+          path: '/',
+        });
         setIsSignedIn(true)
         setCurrentUser(res?.data.data)
       } else {
