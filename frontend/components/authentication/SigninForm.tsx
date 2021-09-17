@@ -17,6 +17,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
+import Divider from '@material-ui/core/Divider';
 
 import { Icon } from '@iconify/react';
 import googleFill from '@iconify/icons-eva/google-fill';
@@ -27,6 +28,7 @@ import eyeOffFill from '@iconify/icons-eva/eye-off-fill';
 import { setCookie } from 'nookies';
 
 import { AuthContext } from "../../pages/_app"
+import { Dialogcontext } from "../../pages/_app"
 import { signIn } from "../../hooks/auth"
 import { SignInParams } from "../../types/authitem"
 
@@ -46,6 +48,30 @@ function Copyright() {
 }
 
 const useStyles = makeStyles((theme) => ({
+  redButton: {
+    fontSize: '1rem',
+    fontWeight: 500,
+    backgroundColor: theme.palette.grey[50],
+    border: '1px solid',
+    borderColor: theme.palette.grey[700],
+    color: theme.palette.grey[700],
+    textTransform: 'none',
+    '&:hover': {
+        backgroundColor: theme.palette.primary.light
+    },
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '0.875rem'
+    }
+  },
+  loginIcon: {
+    marginRight: '16px',
+    [theme.breakpoints.down('sm')]: {
+        marginRight: '8px'
+    }
+  },
+  signDivider: {
+      flexGrow: 1
+  },
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -72,10 +98,13 @@ const useStyles = makeStyles((theme) => ({
 const SignIn = () => {
   const classes = useStyles();
   const router = useRouter();
-  const { setIsSignedIn, setCurrentUser } = useContext(AuthContext)
+  const { setLoading, setIsSignedIn, setCurrentUser } = useContext(AuthContext)
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [showPassword, setShowPassword] = useState(false);
+  const { setIsDialog, setDialogMsg ,setTitleDialog} = useContext(Dialogcontext)
+
+
   const handleShowPassword = () => {
     setShowPassword((show) => !show);
   };
@@ -85,43 +114,45 @@ const SignIn = () => {
   const loginGoogle = () => {
     window.location.href = process.env.NEXT_PUBLIC_BACKENDBASEURL + "auth/google_oauth2?auth_origin_url=" + process.env.NEXT_PUBLIC_FRONTENDBASEURL
   }
+
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-
+    setLoading(true)
     const params: SignInParams = {
       email: email,
       password: password
     }
 
-    try {
-      const res = await signIn(params)
-      if (res.status === 200) {
+    await signIn(params).then(response => {
+      if (response.status === 200) {
         // ログインに成功した場合はCookieに各値を格納
-        setCookie(null, '_access_token', res.headers["access-token"], {
+        setCookie(null, '_access_token', response.headers["access-token"], {
           maxAge: 30 * 24 * 60 * 60, // お好きな期限を
           path: '/',
         });
 
-        setCookie(null, '_client', res.headers["client"], {
+        setCookie(null, '_client', response.headers["client"], {
           maxAge: 30 * 24 * 60 * 60, // お好きな期限を
           path: '/',
         });
 
-        setCookie(null, '_uid', res.headers["uid"], {
+        setCookie(null, '_uid', response.headers["uid"], {
           maxAge: 30 * 24 * 60 * 60, // お好きな期限を
           path: '/',
         });
 
         setIsSignedIn(true)
-        setCurrentUser(res.data.data)
+        setCurrentUser(response.data.data)
 
         router.push("/")
-      } else {
-        router.push("/signin")
       }
-    } catch (err) {
-      router.push("/signin")
-    }
+    }).catch(error => {
+      setIsDialog(true)
+      setTitleDialog("サインインエラー")
+      setDialogMsg(error.response.data.errors.join(""))
+    })
+
+    setLoading(false)
   }
 
   return (
@@ -136,15 +167,18 @@ const SignIn = () => {
         </Typography>
 
         <Grid container justifyContent="center" className={classes.authsocial} spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Button fullWidth size="large" color="inherit" variant="outlined" onClick={loginGoogle}>
-              <Icon icon={googleFill} color="#DF3E30" height={24} />
+          <Grid item xs={12}>
+            <Button fullWidth size="large" color="inherit" variant="outlined" className={classes.redButton} onClick={loginGoogle}>
+              <Icon icon={googleFill} color="#DF3E30" height={24} className={classes.loginIcon} />Sign in with Google
             </Button>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <Button fullWidth size="large" color="inherit" variant="outlined" onClick={loginTwitter}>
-              <Icon icon={twitterFill} color="#1C9CEA" height={24} />
+          <Grid item xs={12}>
+            <Button fullWidth size="large" color="inherit" variant="outlined" className={classes.redButton} onClick={loginTwitter}>
+              <Icon icon={twitterFill} color="#1C9CEA" height={24} className={classes.loginIcon} />Sign in with Twitter
             </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Divider className={classes.signDivider} orientation="horizontal" />
           </Grid>
         </Grid>
 

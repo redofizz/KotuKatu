@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext }  from 'react'
+import React, { useState, useEffect, useContext, createContext, Dispatch, SetStateAction }  from 'react'
 
 import { NextPageContext } from 'next';
 import { AppProps } from 'next/app'
@@ -7,6 +7,16 @@ import { useRouter } from 'next/router';
 
 import { CssBaseline } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core/styles'
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@material-ui/core/Button';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { makeStyles } from '@material-ui/core/styles';
 
 import theme from './theme'
 
@@ -20,22 +30,50 @@ import queryString from "query-string";
 // グローバルで扱う変数・関数
 export const AuthContext = createContext({} as {
   loading: boolean
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setLoading: Dispatch<SetStateAction<boolean>>
   isSignedIn: boolean
-  setIsSignedIn: React.Dispatch<React.SetStateAction<boolean>>
+  setIsSignedIn: Dispatch<SetStateAction<boolean>>
   currentUser: User | undefined
-  setCurrentUser: React.Dispatch<React.SetStateAction<User | undefined>>
+  setCurrentUser: Dispatch<SetStateAction<User | undefined>>
 })
 
+// グローバルで扱う変数・関数
+export const Dialogcontext = createContext({} as {
+  isDialog: boolean
+  setIsDialog: Dispatch<SetStateAction<boolean>>
+  DialogMsg: string
+  setDialogMsg: Dispatch<SetStateAction<string>>
+  TitleDialog: string
+  setTitleDialog: Dispatch<SetStateAction<string>>
+})
+
+const useStyles = makeStyles((theme) => ({
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+}))
+
+
 const MyApp = ({ Component, pageProps }: AppProps, ctx: NextPageContext) => {
+  const classes = useStyles();
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(true)
   const [isSignedIn, setIsSignedIn] = useState<boolean>(false)
   const [currentUser, setCurrentUser] = useState<User | undefined>()
+  const [isDialog, setIsDialog] = useState<boolean>(false)
+  const [DialogMsg, setDialogMsg] = useState<string>("")
+  const [TitleDialog, setTitleDialog] = useState<string>("")
+
+  const handleDialogClose = () => {
+    setIsDialog(false)
+    setDialogMsg("")
+  };
 
   // 認証済みのユーザーがいるかどうかチェック
   // 確認できた場合はそのユーザーの情報を取得
   const handleGetCurrentUser = async () => {
+    setLoading(true)
     router.query = queryString.parse(router.asPath.split(/\?/)[1]) as { [key: string]: string };
     if(router.query.auth_token != undefined){
       const auth_token : string = router.query.auth_token == undefined ? "" : router.query.auth_token?.toString()
@@ -58,7 +96,7 @@ const MyApp = ({ Component, pageProps }: AppProps, ctx: NextPageContext) => {
 
     try {
       const res = await getCurrentUser()
-      if (res?.data.success === true) {
+      if (res?.data.success) {
         setCookie(null, '_access_token', res.headers["access-token"], {
           maxAge: 30 * 24 * 60 * 60, // お好きな期限を
           path: '/',
@@ -74,8 +112,6 @@ const MyApp = ({ Component, pageProps }: AppProps, ctx: NextPageContext) => {
         });
         setIsSignedIn(true)
         setCurrentUser(res?.data.data)
-      } else {
-        console.log("No current user")
       }
     } catch (err) {
       console.log(err)
@@ -116,17 +152,43 @@ const MyApp = ({ Component, pageProps }: AppProps, ctx: NextPageContext) => {
     typeof pageProps === 'undefined' ? null : (
       <>
         <AuthContext.Provider value={{ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser}}>
-          <Head>
-            <title>KotuKatu</title>
-            <meta
-              name="viewport"
-              content="minimum-scale=1, initial-scale=1, width=device-width"
-            />
-          </Head>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Component {...pageProps} />
-          </ThemeProvider>
+          <Dialogcontext.Provider value={{ isDialog, setIsDialog, DialogMsg, setDialogMsg, TitleDialog, setTitleDialog }}>
+            <Head>
+              <title>KotuKatu</title>
+              <meta
+                name="viewport"
+                content="minimum-scale=1, initial-scale=1, width=device-width"
+              />
+            </Head>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <Component {...pageProps} />
+
+              <Dialog
+                open={isDialog}
+                onClose={handleDialogClose}
+              >
+                <DialogTitle id="alert-dialog-title">
+                  {TitleDialog}
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    {DialogMsg}
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleDialogClose} autoFocus>
+                    OK
+                  </Button>
+                </DialogActions>
+              </Dialog>
+
+              <Backdrop className={classes.backdrop} open={loading}>
+                <CircularProgress color="inherit" />
+              </Backdrop>
+
+            </ThemeProvider>
+          </Dialogcontext.Provider>
         </AuthContext.Provider>
       </>
     );

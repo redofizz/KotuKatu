@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useContext } from "react"
 
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -21,6 +21,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 
 
+import { Dialogcontext, AuthContext } from "../../pages/_app"
 import { changePassword } from "../../hooks/auth"
 import { ChangePasswordParams } from "../../types/authitem"
 
@@ -72,6 +73,8 @@ export default function ChangePasswordForm() {
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>("")
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
+  const { setLoading } = useContext(AuthContext)
+  const { setIsDialog, setDialogMsg, setTitleDialog } = useContext(Dialogcontext)
   const handleShowPassword = () => {
     setShowPassword((show) => !show);
   };
@@ -82,6 +85,7 @@ export default function ChangePasswordForm() {
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
 
+    setLoading(true)
     router.query = queryString.parse(router.asPath.split(/\?/)[1]) as { [key: string]: string };
 
     const reset_password_token : string = router.query.reset_password_token == undefined ? "" : router.query.reset_password_token?.toString()
@@ -91,20 +95,20 @@ export default function ChangePasswordForm() {
       reset_password_token: reset_password_token
     }
 
-    try {
-      const res = await changePassword(params)
-
-      if (res.status === 200) {
+    await changePassword(params).then(response => {
+      if (response.status === 200) {
         // 成功の場合はメール確認に入る
         // ダイアログを出す
         //　登録に成功しました。
         router.push("/signin")
-      } else {
-        // router.push("/signin")
-      }
-    } catch (err) {
-      // router.push("/signup")
-    }
+      } 
+    }).catch(error => {
+      setIsDialog(true)
+      setTitleDialog("パスワード変更エラー")
+      setDialogMsg(error.response.data.errors.join(""))
+    })
+
+    setLoading(false)
   }
 
   return (

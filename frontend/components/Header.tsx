@@ -9,6 +9,7 @@ import Toolbar from "@material-ui/core/Toolbar"
 import Typography from "@material-ui/core/Typography"
 import Button from "@material-ui/core/Button"
 
+import { Dialogcontext } from "../pages/_app"
 import { AuthContext } from "../pages/_app"
 import { signOut } from "../hooks/auth"
 
@@ -33,15 +34,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Header = () => {
-  const { loading, isSignedIn, setIsSignedIn } = useContext(AuthContext)
+  const { loading, setLoading, isSignedIn, setIsSignedIn } = useContext(AuthContext)
+  const { setIsDialog, setDialogMsg, setTitleDialog } = useContext(Dialogcontext)
   const classes = useStyles()
   const router = useRouter();
 
   const handleSignOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    try {
-      const res = await signOut()
-
-      if (res.data.success === true) {
+    setLoading(true)
+    await signOut().then(response => {
+      if (response.status === 200) {
         // サインアウト時には各Cookieを削除
         destroyCookie(null, '_access_token')
         destroyCookie(null, '_client')
@@ -50,12 +51,13 @@ const Header = () => {
         setIsSignedIn(false)
 
         router.push("/signin")
-      } else {
-        router.push("/")
-      }
-    } catch (err) {
-      router.push("/")
-    }
+      } 
+    }).catch(error => {
+      setIsDialog(true)
+      setTitleDialog("サインアウトエラー")
+      setDialogMsg(error.response.data.errors.join(""))
+    })
+    setLoading(false)
   }
 
   const AuthButtons = () => {

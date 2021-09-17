@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -15,6 +15,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
 
+import { Dialogcontext, AuthContext } from "../../pages/_app"
 import { resetPassword } from "../../hooks/auth"
 import { ResetPasswordParams } from "../../types/authitem"
 
@@ -57,13 +58,28 @@ export default function ForgotPassword() {
   const classes = useStyles();
   const router = useRouter();
   const [email, setEmail] = useState<string>("")
+  const { setLoading } = useContext(AuthContext)
+  const { setIsDialog, setDialogMsg ,setTitleDialog} = useContext(Dialogcontext)
   const registerUser = async (event: any) => {
     event.preventDefault()
-
+    setLoading(true)
     const params: ResetPasswordParams = {
       email: email,
       redirect_url: process.env.NEXT_PUBLIC_FRONTENDBASEURL + "changepass" ?? "http://localhost:3000/" + "changepass"
     }
+
+    await resetPassword(params).then(response => {
+      if (response.status === 200) {
+        // 成功の場合はメール確認に入る
+        // ダイアログを出す
+        //　登録に成功しました。
+        router.push("/")
+      } 
+    }).catch(error => {
+      setIsDialog(true)
+      setTitleDialog("リセットパスワードエラー")
+      setDialogMsg(error.response.data.errors.join(""))
+    })
 
     try {
       const res = await resetPassword(params)
@@ -76,6 +92,8 @@ export default function ForgotPassword() {
     } catch (err) {
       router.push("/signin")
     }
+    
+    setLoading(false)
   }
 
   return (

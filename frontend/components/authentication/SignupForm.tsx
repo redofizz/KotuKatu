@@ -15,6 +15,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
+import Divider from '@material-ui/core/Divider';
 
 import { Icon } from '@iconify/react';
 import googleFill from '@iconify/icons-eva/google-fill';
@@ -22,9 +23,7 @@ import twitterFill from '@iconify/icons-eva/twitter-fill';
 import eyeFill from '@iconify/icons-eva/eye-fill';
 import eyeOffFill from '@iconify/icons-eva/eye-off-fill';
 
-
-
-import { AuthContext } from "../../pages/_app"
+import { Dialogcontext, AuthContext } from "../../pages/_app"
 import { signUp } from "../../hooks/auth"
 import { SignUpParams } from "../../types/authitem"
 
@@ -44,6 +43,30 @@ function Copyright() {
 }
 
 const useStyles = makeStyles((theme) => ({
+  redButton: {
+    fontSize: '1rem',
+    fontWeight: 500,
+    backgroundColor: theme.palette.grey[50],
+    border: '1px solid',
+    borderColor: theme.palette.grey[700],
+    color: theme.palette.grey[700],
+    textTransform: 'none',
+    '&:hover': {
+        backgroundColor: theme.palette.primary.light
+    },
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '0.875rem'
+    }
+  },
+  loginIcon: {
+    marginRight: '16px',
+    [theme.breakpoints.down('sm')]: {
+        marginRight: '8px'
+    }
+  },
+  signDivider: {
+      flexGrow: 1
+  },
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -74,9 +97,10 @@ export default function SignUp() {
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>("")
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
-  const { setIsSignedIn, setCurrentUser } = useContext(AuthContext)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
+  const { setLoading } = useContext(AuthContext)
+  const { setIsDialog, setDialogMsg , setTitleDialog} = useContext(Dialogcontext)
   const handleShowPassword = () => {
     setShowPassword((show) => !show);
   };
@@ -93,6 +117,7 @@ export default function SignUp() {
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
 
+    setLoading(true)
     const params: SignUpParams = {
       name: name,
       email: email,
@@ -101,20 +126,20 @@ export default function SignUp() {
       confirm_success_url: process.env.NEXT_PUBLIC_FRONTENDBASEURL ?? "http://localhost:3000"
     }
 
-    try {
-      const res = await signUp(params)
-
-      if (res.status === 200) {
+    await signUp(params).then(response => {
+      if (response.status === 200) {
         // 成功の場合はメール確認に入る
         // ダイアログを出す
         //　登録に成功しました。
         router.push("/")
-      } else {
-        router.push("/signup")
-      }
-    } catch (err) {
-      router.push("/signup")
-    }
+      } 
+    }).catch(error => {
+      setIsDialog(true)
+      setTitleDialog("サインアップエラー")
+      setDialogMsg(error.response.data.errors.join(""))
+    })
+
+    setLoading(false)
   }
 
   return (
@@ -129,15 +154,18 @@ export default function SignUp() {
         </Typography>
 
         <Grid container justifyContent="center" className={classes.authsocial} spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Button fullWidth size="large" color="inherit" variant="outlined" onClick={loginGoogle}>
-              <Icon icon={googleFill} color="#DF3E30" height={24} />
+          <Grid item xs={12}>
+            <Button fullWidth size="large" color="inherit" variant="outlined" className={classes.redButton} onClick={loginGoogle}>
+              <Icon icon={googleFill} color="#DF3E30" height={24} className={classes.loginIcon} />Sign up with Google
             </Button>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <Button fullWidth size="large" color="inherit" variant="outlined" onClick={loginTwitter}>
-              <Icon icon={twitterFill} color="#1C9CEA" height={24} />
+          <Grid item xs={12}>
+            <Button fullWidth size="large" color="inherit" variant="outlined" className={classes.redButton} onClick={loginTwitter}>
+              <Icon icon={twitterFill} color="#1C9CEA" height={24} className={classes.loginIcon} />Sign up with Twitter
             </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Divider className={classes.signDivider} orientation="horizontal" />
           </Grid>
         </Grid>
 
