@@ -3,16 +3,18 @@ import { useState, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import { makeStyles } from '@mui/styles';
+import theme from '../../pages/theme';
+
+import Container from '@mui/material/Container';
 
 
 import { Dialogcontext, AuthContext } from "../../pages/_app"
@@ -34,7 +36,7 @@ function Copyright() {
   );
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -73,6 +75,9 @@ export default function ForgotPassword() {
         // 成功の場合はメール確認に入る
         // ダイアログを出す
         //　登録に成功しました。
+        setIsDialog(true)
+        setTitleDialog("リセットパスワード")
+        setDialogMsg("パスワードメールを送信しました。")
         router.push("/")
       } 
     }).catch(error => {
