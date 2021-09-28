@@ -2,7 +2,7 @@ import apiclient from "../apicient/apiclient"
 import { parseCookies } from 'nookies';
 import { NextPageContext } from 'next';
 
-import { SignUpParams, SignInParams, ResetPasswordParams, ChangePasswordParams } from "../types/authitem"
+import { SignUpParams, SignInParams, ResetPasswordParams, ChangePasswordParams, AuthChangePasswordParams, EditProfileParams } from "../types/authitem"
 
 // サインアップ（新規アカウント作成）
 export const signUp = (params: SignUpParams) => {
@@ -21,7 +21,7 @@ export const signOut = (ctx?: NextPageContext) => {
     "access-token": Cookies._access_token,
     "client": Cookies._client,
     "uid": Cookies._uid
-  }})  
+  }})
 }
 
 // パスワードリセット
@@ -32,6 +32,26 @@ export const resetPassword = (params: ResetPasswordParams) => {
 // パスワード変更
 export const changePassword = (params: ChangePasswordParams) => {
   return apiclient.put("auth/password", params)
+}
+
+// パスワード変更
+export const AuthChangePassword = (params: AuthChangePasswordParams, ctx?: NextPageContext) => {
+  const Cookies = parseCookies(ctx);
+  return apiclient.put("auth/password", params, { headers: {
+    "access-token": Cookies._access_token,
+    "client": Cookies._client,
+    "uid": Cookies._uid
+  }})
+}
+
+// マイプロフィールを編集
+export const EditProfille = (params: EditProfileParams, ctx?: NextPageContext) => {
+  const Cookies = parseCookies(ctx);
+  return apiclient.put("auth", params, { headers: {
+    "access-token": Cookies._access_token,
+    "client": Cookies._client,
+    "uid": Cookies._uid
+  }})
 }
 
 // 認証済みのユーザーを取得

@@ -3,17 +3,19 @@ import React, { useContext } from "react"
 import { useRouter } from 'next/router';
 
 import { destroyCookie } from 'nookies';
-import { makeStyles } from "@material-ui/core/styles"
-import AppBar from "@material-ui/core/AppBar"
-import Toolbar from "@material-ui/core/Toolbar"
-import Typography from "@material-ui/core/Typography"
-import Button from "@material-ui/core/Button"
+import { makeStyles } from "@mui/styles"
+import theme from '../pages/theme'
+
+import AppBar from "@mui/material/AppBar"
+import Toolbar from "@mui/material/Toolbar"
+import Typography from "@mui/material/Typography"
+import Button from "@mui/material/Button"
 
 import { Dialogcontext } from "../pages/_app"
 import { AuthContext } from "../pages/_app"
 import { signOut } from "../hooks/auth"
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     flexGrow: 1,
   },
@@ -66,13 +68,22 @@ const Header = () => {
     if (!loading) {
       if (isSignedIn) {
         return (
-          <Button
-            color="inherit"
-            className={classes.linkBtn}
-            onClick={handleSignOut}
-          >
-            SIGNOUT
-          </Button>
+          <>
+            <Button
+              href="/editprofile"
+              color="inherit"
+              className={classes.linkBtn}
+            >
+              MYPROFILE
+            </Button>
+            <Button
+              color="inherit"
+              className={classes.linkBtn}
+              onClick={handleSignOut}
+            >
+              SIGNOUT
+            </Button>
+          </>
         )
       } else {
         return (

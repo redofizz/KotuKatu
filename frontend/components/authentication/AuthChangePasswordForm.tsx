@@ -9,6 +9,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
@@ -23,10 +24,8 @@ import IconButton from '@mui/material/IconButton';
 
 
 import { Dialogcontext, AuthContext } from "../../pages/_app"
-import { changePassword } from "../../hooks/auth"
-import { ChangePasswordParams } from "../../types/authitem"
-
-import queryString from "query-string";
+import { AuthChangePassword } from "../../hooks/auth"
+import { AuthChangePasswordParams } from "../../types/authitem"
 
 function Copyright() {
   return (
@@ -67,7 +66,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export default function ChangePasswordForm() {
+export default function AuthChangePasswordForm() {
   const classes = useStyles();
   const router = useRouter();
   const [password, setPassword] = useState<string>("")
@@ -87,16 +86,13 @@ export default function ChangePasswordForm() {
     e.preventDefault()
 
     setLoading(true)
-    router.query = queryString.parse(router.asPath.split(/\?/)[1]) as { [key: string]: string };
 
-    const reset_password_token : string = router.query.reset_password_token == undefined ? "" : router.query.reset_password_token?.toString()
-    const params: ChangePasswordParams = {
+    const params: AuthChangePasswordParams = {
       password: password,
-      password_confirmation: passwordConfirmation,
-      reset_password_token: reset_password_token
+      password_confirmation: passwordConfirmation
     }
 
-    await changePassword(params).then(response => {
+    await AuthChangePassword(params).then(response => {
       if (response.status === 200) {
         // 成功の場合はメール確認に入る
         // ダイアログを出す
@@ -104,7 +100,7 @@ export default function ChangePasswordForm() {
         setIsDialog(true)
         setTitleDialog("パスワード変更")
         setDialogMsg("パスワード変更を完了しました。")
-        router.push("/signin")
+        router.push("/")
       } 
     }).catch(error => {
       setIsDialog(true)
@@ -118,14 +114,10 @@ export default function ChangePasswordForm() {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Change Pasword
+      <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
+        <Typography variant="h6" gutterBottom>
+          パスワード変更
         </Typography>
-
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -186,7 +178,7 @@ export default function ChangePasswordForm() {
             パスワードを変更
           </Button>
         </form>
-      </div>
+      </Paper>
       <Box mt={5}>
         <Copyright />
       </Box>
