@@ -7,4 +7,11 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable, :trackable, :Lockable,
          :recoverable, :rememberable, :validatable, :confirmable, :omniauthable
   include DeviseTokenAuth::Concerns::User
+
+  has_many :articles, dependent: :destroy, foreign_key: :article_user_id
+
+  def articles
+    return Article.where(user_id: self.id)
+  end
+
 end

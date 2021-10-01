@@ -94,6 +94,12 @@ const MyApp = ({ Component, pageProps }: AppProps, ctx: NextPageContext) => {
       });
     }
 
+    if(router.query.account_confirmation_success){
+      setIsDialog(true)
+      setTitleDialog("メールアドレス確認")
+      setDialogMsg("メールアドレス確認に成功しました。")
+    }
+
     try {
       const res = await getCurrentUser()
       if (res?.data.success) {

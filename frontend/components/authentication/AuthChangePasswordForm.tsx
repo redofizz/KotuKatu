@@ -105,7 +105,7 @@ export default function AuthChangePasswordForm() {
     }).catch(error => {
       setIsDialog(true)
       setTitleDialog("パスワード変更エラー")
-      setDialogMsg(error.response.data.errors.join(""))
+      setDialogMsg(error.response.data.errors.full_messages.join(""))
     })
 
     setLoading(false)

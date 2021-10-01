@@ -151,7 +151,7 @@ const SignIn = () => {
     }).catch(error => {
       setIsDialog(true)
       setTitleDialog("サインインエラー")
-      setDialogMsg(error.response.data.errors.join(""))
+      setDialogMsg(error.response.data.errors.full_messages.join(""))
     })
 
     setLoading(false)
