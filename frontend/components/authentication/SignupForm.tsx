@@ -135,14 +135,14 @@ export default function SignUp() {
         // ダイアログを出す
         //　登録に成功しました。
         setIsDialog(true)
-        setTitleDialog("サインアップエラー")
+        setTitleDialog("サインアップ")
         setDialogMsg("登録に成功しました。")
         router.push("/")
       } 
     }).catch(error => {
       setIsDialog(true)
       setTitleDialog("サインアップエラー")
-      setDialogMsg(error.response.data.errors.join(""))
+      setDialogMsg(error.response.data.errors.full_messages.join(""))
     })
 
     setLoading(false)

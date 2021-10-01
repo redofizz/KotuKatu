@@ -83,7 +83,7 @@ export default function ForgotPassword() {
     }).catch(error => {
       setIsDialog(true)
       setTitleDialog("リセットパスワードエラー")
-      setDialogMsg(error.response.data.errors.join(""))
+      setDialogMsg(error.response.data.errors.full_messages.join(""))
     })
 
     try {
